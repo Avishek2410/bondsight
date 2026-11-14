@@ -2,14 +2,15 @@
 
 BondSight checks photos of wire-bonded chips for defects. It draws a box around each problem it
 finds, says what kind of defect it is, and learns from the operators who confirm or reject its
-calls. It runs on a Raspberry Pi 5 without a GPU, so the photos never have to leave the factory.
+calls. It runs on an ordinary PC, or on something as small as a Raspberry Pi 5, and it needs no
+GPU, so the photos never have to leave the factory.
 
 [![Licence: MIT](https://img.shields.io/badge/code-MIT-2A2F33)](LICENSE)
 [![Text: CC BY 4.0](https://img.shields.io/badge/text-CC%20BY%204.0-2A2F33)](#licence-and-credits)
-![Runs on Raspberry Pi 5](https://img.shields.io/badge/runs%20on-Raspberry%20Pi%205-C98A00)
+![Runs on a PC or a Raspberry Pi 5](https://img.shields.io/badge/runs%20on-PC%20%C2%B7%20Raspberry%20Pi%205-C98A00)
 ![No GPU needed](https://img.shields.io/badge/GPU-not%20needed-767D7A)
 
-![BondSight: open-source AOI for wire bonds. Finds wire-bond defects in photos, runs on a Raspberry Pi 5, learns from your operators.](docs/images/hero.webp)
+![BondSight: open-source AOI for wire bonds. Finds wire-bond defects in photos, runs on a PC or a Raspberry Pi 5, learns from your operators.](docs/images/hero.webp)
 
 I'm Avishek Mondal, a materials scientist. I've worked hands-on in semiconductor packaging: die
 attach, wire bonding, encapsulation, yield and defect analysis. I started BondSight to learn how a
@@ -25,7 +26,7 @@ was done, use it, or improve it.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/fig-glance-dark.webp">
-  <img alt="At a glance: 0% good boards flagged; 100% bent wires found on power-module photos; 82% missing wires found in close-ups; 3.5 s per unit on a Raspberry Pi 5" src="docs/images/fig-glance-light.webp">
+  <img alt="At a glance: 0% good boards flagged; 100% bent wires found on power-module photos; 82% missing wires found in close-ups; 3.5 s per unit even on a Raspberry Pi 5" src="docs/images/fig-glance-light.webp">
 </picture>
 
 These numbers come from test photos the model never saw during training. On the NTUST photos,
@@ -37,6 +38,10 @@ Some of those test photos come from the same sources as the training data, so on
 the numbers will be lower until the model has been trained on that product. The biggest single
 improvement so far came from adding photos of good boards to the training: the share of good
 boards wrongly flagged dropped from 100% to 0%.
+
+It runs on the CPU, so any 64-bit Windows or Linux computer will do. The Raspberry Pi 5 is the
+smallest machine it has been tested on: there, a two-camera unit takes about 3.5 s. On a laptop CPU
+one photo takes 2.3 s instead of the Pi's 3.1 s, and a faster PC is quicker still.
 
 All results are in [docs/results.md](docs/results.md). The data, the maths and the models are
 explained in [docs/technical.md](docs/technical.md).
