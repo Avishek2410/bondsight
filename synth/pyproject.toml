@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wirebond-synth"
+version = "0.1.0"
+description = "Synthetic wire-bond images with labelled defects (top + angled views)"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24", "opencv-python-headless>=4.8"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+wbsynth = "wirebond_synth.cli:main"
+
+[tool.setuptools]
+packages = ["wirebond_synth"]

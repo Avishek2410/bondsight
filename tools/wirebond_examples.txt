@@ -1,0 +1,26 @@
+# Hand-picked real wire-bond photos (positive examples for rank_by_examples.py)
+commons/images/2N990_wire_bonding.jpg
+commons/images/AMD3101E_cropped_wedge-wedge_bonding_.jpg
+commons/images/304id6av_7.jpg
+commons/images/300301_opened.jpg
+commons/images/2N3771_die.jpg
+commons/images/2_670_05_.jpg
+commons/images/2_670_07_.jpg
+commons/images/2N6285_die.jpg
+commons/images/2N5886_die.jpg
+commons/images/1lb142b_1.jpg
+commons/images/2N1307_transistor_die.jpg
+commons/images/300301_die.jpg
+commons/images/248_2_1_.jpg
+commons/images/248_2_5_.jpg
+commons/images/2N3773_die.jpg
+commons/images/1ir141b_2.jpg
+commons/images/304id6av_5.jpg
+commons/images/2N1307_transistor_die_with_bond_wires_attached.jpg
+commons/images/1lb142b_2.jpg
+commons/images/2TC843A_09_.jpg
+commons/images/2N4957_wire_bonding.jpg
+commons/images/2N930.jpg
+commons/images/07R01.jpg
+ttu-tornado/Modules_M16_Image1.jpg
+ttu-tornado/Modules_M16_Image10.jpg

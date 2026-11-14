@@ -1,0 +1,96 @@
+<!doctype html>
+<!--
+  BondSight banner. Live view: /docs/brand/hero.html (plays in real time).
+  One frame at t seconds (0..LOOP): /docs/brand/hero.html?t=1.25 — tools/figures/render_hero.py captures
+  the frames and writes docs/images/hero.webp (animated) and docs/images/hero.jpg (still).
+-->
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#0b0d10}
+#hero{position:absolute;left:0;top:0;width:1500px;height:500px;overflow:hidden;font-family:Archivo,"Arial Narrow",sans-serif;color:#EDEFF2;
+  background:radial-gradient(900px 520px at 78% 55%,#2a2f36 0%,#171a1f 55%,#0e1013 100%)}
+#loops{position:absolute;inset:0}
+.word{position:absolute;left:72px;top:108px}
+.word .k{font-size:15px;letter-spacing:.32em;color:#D9A63A;font-weight:800;font-stretch:110%}
+.word h1{margin:10px 0 0;font-size:118px;line-height:.9;font-weight:900;font-stretch:72%;letter-spacing:.01em}
+.word h1 span{color:#E6B34A}
+.word p{margin:20px 0 0;font-size:27px;color:#C9CED6;font-weight:500;max-width:560px;line-height:1.3}
+.chips{position:absolute;left:72px;top:392px;display:flex;gap:10px}
+.chip{border:1px solid #3a414b;background:#1a1e24cc;border-radius:999px;padding:9px 16px;font-size:16px;color:#DDE1E6;font-weight:600}
+.chip b{color:#E6B34A}
+.stage{position:absolute;left:760px;top:40px;width:700px;height:420px;perspective:1400px}
+.card{position:absolute;width:360px;height:360px;border-radius:10px;overflow:hidden;box-shadow:0 30px 60px #000a,0 0 0 1px #ffffff14}
+.card img{display:block;width:100%;height:100%}
+.c1{left:10px;top:40px;transform:rotateY(22deg) rotateX(4deg) translateZ(-40px)}
+.c2{left:330px;top:20px;transform:rotateY(-14deg) rotateX(3deg)}
+.beam{position:absolute;top:0;bottom:0;width:90px;margin-left:-90px;pointer-events:none;
+  background:linear-gradient(90deg,#E6B34A00,#E6B34A18 60%,#E6B34A55 92%,#FFF4D6 100%);mix-blend-mode:screen}
+.beam::after{content:"";position:absolute;right:-1px;top:0;bottom:0;width:2px;background:#FFF6DF;box-shadow:0 0 14px 3px #E6B34Aaa}
+.box{position:absolute;border:4px solid #E5484D;border-radius:4px;box-shadow:0 0 18px #E5484Daa;transform-origin:center}
+.tag{position:absolute;background:#E5484D;color:#fff;font-weight:800;font-stretch:85%;font-size:15px;padding:4px 9px;border-radius:3px;white-space:nowrap}
+.lamp{position:absolute;right:26px;top:200px;display:flex;flex-direction:column;gap:5px}
+.lamp i{width:22px;height:26px;border-radius:5px;display:block;opacity:.18}
+.lamp .r{background:#E5484D}.lamp .a{background:#E08A00}.lamp .g{background:#2FB386}
+</style></head><body>
+<div id="hero">
+  <svg id="loops" viewBox="0 0 1500 500" preserveAspectRatio="none">
+    <defs><linearGradient id="gw" x1="0" x2="1"><stop offset="0" stop-color="#E6B34A" stop-opacity="0"/><stop offset=".25" stop-color="#E6B34A" stop-opacity=".55"/><stop offset="1" stop-color="#E6B34A" stop-opacity=".08"/></linearGradient>
+      <filter id="pg" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.5"/></filter></defs>
+    <g fill="none" stroke="url(#gw)" stroke-width="2" id="wires">
+      <path d="M-20 470 C 180 330, 380 330, 560 470"/><path d="M40 488 C 240 360, 430 360, 620 488"/>
+      <path d="M100 500 C 300 395, 480 395, 680 500"/><path d="M-60 440 C 120 300, 330 300, 500 440" stroke-opacity=".6"/>
+    </g>
+    <g fill="none" stroke="#FFE3A3" stroke-width="3" stroke-linecap="round" id="pulses" filter="url(#pg)"></g>
+    <g fill="#E6B34A" opacity=".5"><circle cx="560" cy="470" r="5"/><circle cx="620" cy="488" r="5"/><circle cx="500" cy="440" r="5"/></g>
+  </svg>
+  <div class="word">
+    <div class="k">OPEN-SOURCE AOI FOR WIRE BONDS</div>
+    <h1>BOND<span>SIGHT</span></h1>
+    <p>Finds wire-bond defects in photos. Runs on a Raspberry&nbsp;Pi&nbsp;5. Learns from your operators.</p>
+  </div>
+  <div class="chips"><span class="chip"><b>8</b> defect types</span><span class="chip">no GPU, no cloud</span><span class="chip">MIT licence</span></div>
+  <div class="stage">
+    <div class="card c1"><img src="/demo/samples/wire_sweep_top.jpg"><div class="beam" id="b1"></div>
+      <div class="box" id="x1" style="left:55.3%;top:5%;width:11%;height:31.4%"></div>
+      <div class="tag" id="t1" style="left:47%;top:37.5%">W05 · WIRE SWEEP · 72%</div></div>
+    <div class="card c2"><img src="/demo/samples/macro_broken_wire_top.jpg"><div class="beam" id="b2"></div>
+      <div class="box" id="x2" style="left:0;top:53.3%;width:87%;height:26.2%"></div>
+      <div class="tag" id="t2" style="left:2%;top:81%">BROKEN WIRE · 81%</div></div>
+  </div>
+  <div class="lamp"><i class="r" id="lr"></i><i class="a"></i><i class="g" id="lg"></i></div>
+</div>
+<script>
+const LOOP=5.0;
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), ease=x=>1-Math.pow(1-clamp(x),3), seg=(t,a,b)=>clamp((t-a)/(b-a));
+const $=id=>document.getElementById(id);
+// light pulses travelling along the gold wires
+const pulses=$("pulses");
+[...document.querySelectorAll("#wires path")].forEach(w=>{const p=w.cloneNode();p.removeAttribute("stroke-opacity");pulses.appendChild(p)});
+const P=[...pulses.children],L=P.map(p=>p.getTotalLength());
+function frame(t){
+  t=((t%LOOP)+LOOP)%LOOP;
+  P.forEach((p,i)=>{const len=L[i],ph=((t/LOOP)+i*0.27)%1,dash=70;
+    p.setAttribute("stroke-dasharray",`${dash} ${len+dash}`);p.setAttribute("stroke-dashoffset",`${dash-ph*(len+dash)}`);
+    p.setAttribute("opacity",(0.9*Math.sin(Math.PI*ph)).toFixed(3))});
+  // scan beams: picture 1 from 0.25 to 1.55 s, picture 2 from 1.45 to 2.75 s; everything resets 4.35-4.85 s
+  const s1=seg(t,0.25,1.55),s2=seg(t,1.45,2.75),out=seg(t,4.35,4.85);
+  [["b1",s1],["b2",s2]].forEach(([id,s])=>{const b=$(id);b.style.left=(s*125)+"%";b.style.opacity=(s>0&&s<1)?1:0});
+  // a box appears once the beam has passed it
+  const show=(bx,tg,at)=>{const e=ease(seg(t,at,at+0.28)),e2=ease(seg(t,at+0.12,at+0.4));
+    $(bx).style.opacity=e*(1-out);$(bx).style.transform=`scale(${1.25-0.25*e})`;
+    $(tg).style.opacity=e2*(1-out);$(tg).style.transform=`translateY(${8*(1-e2)}px)`};
+  show("x1","t1",0.25+1.3*0.58);
+  show("x2","t2",1.45+1.3*0.72);
+  // stack light: green while scanning, red once a defect is confirmed
+  const red=seg(t,2.75,2.95)*(1-out);
+  $("lr").style.opacity=0.18+0.82*red;$("lr").style.boxShadow=red>0.05?`0 0 ${22*red}px #E5484D`:"none";
+  $("lg").style.opacity=0.18+0.82*(1-red);$("lg").style.boxShadow=red<0.95?`0 0 ${18*(1-red)}px #2FB386`:"none";
+}
+const T=new URLSearchParams(location.search).get("t");
+document.fonts.ready.then(()=>{
+  if(T!==null){frame(parseFloat(T));document.body.dataset.ready=1}
+  else{const t0=performance.now();(function go(){frame((performance.now()-t0)/1000);requestAnimationFrame(go)})()}
+});
+</script>
+</body></html>

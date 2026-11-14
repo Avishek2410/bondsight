@@ -1,0 +1,45 @@
+# First time:  python3 make_env.py          (creates .env with a random database password)
+# Start:       cd docker && docker compose up -d        (Pi with cameras later: --profile pi)
+# Put the model (.onnx + .json) in docker/models/ and your settings in docker/config.yaml.
+# Data: PostgreSQL keeps its files in docker/pgdata/, pictures go to docker/data/images/.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wb
+      POSTGRES_DB: wirebond
+    env_file: .env                  # POSTGRES_PASSWORD (from make_env.py)
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wb -d wirebond"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # no published port: only the inspector container can reach the database
+
+  inspector:
+    image: wirebond-inspector:dev
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    env_file: .env                  # WBI_DB_PASSWORD (same password)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./models:/models:ro
+      - ./data:/data
+      - ./config.yaml:/config/config.yaml:ro
+    ports:
+      - "127.0.0.1:8080:8080"     # only this computer; change to "8080:8080" to allow the LAN
+
+  # M4 (real cameras on the Pi). USB cameras need /dev/video*. Pi CSI cameras via libcamera
+  # will also need /dev/media*, /dev/dma_heap and /run/udev (read-only) - added in M4.
+  inspector-pi:
+    extends: inspector
+    profiles: ["pi"]
+    devices:
+      - /dev/video0:/dev/video0

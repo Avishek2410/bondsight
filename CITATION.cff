@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use BondSight in your work, please cite it as below."
+title: "BondSight: open-source AOI for wire bonds"
+type: software
+authors:
+  - family-names: Mondal
+    given-names: Avishek
+license: MIT
+repository-code: "https://github.com/Avishek2410/bondsight"
+version: 0.1.0
+date-released: 2026-11-14
+keywords:
+  - wire bonding
+  - semiconductor packaging
+  - automated optical inspection
+  - defect detection
+  - computer vision
+  - Raspberry Pi

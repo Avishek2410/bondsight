@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wirebond-inspector"
+version = "0.1.0"
+description = "Wire-bond inspection runtime: cameras -> ONNX detector -> repetitive-defect tracker -> web UI"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24", "pillow>=10", "onnxruntime>=1.17", "pyyaml>=6",
+  "fastapi>=0.110", "uvicorn>=0.29", "opencv-python-headless>=4.8", "wirebond-synth",
+  "sqlalchemy>=2.0", "alembic>=1.13", "psycopg[binary]>=3.1", "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+test = ["pytest", "httpx", "onnx"]
+
+[project.scripts]
+wbinspect = "wirebond_inspector.__main__:main"
+wbinspect-fit-anomaly = "wirebond_inspector.fit_anomaly:main"
+wbinspect-export = "wirebond_inspector.export:main"
+
+[tool.setuptools]
+packages = ["wirebond_inspector", "wirebond_inspector.sources", "wirebond_inspector.web",
+            "wirebond_inspector.migrations", "wirebond_inspector.migrations.versions"]
+
+[tool.setuptools.package-data]
+"wirebond_inspector.web" = ["static/*"]
+"wirebond_inspector.migrations" = ["script.py.mako"]

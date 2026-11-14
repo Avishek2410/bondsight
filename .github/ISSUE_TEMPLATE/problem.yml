@@ -1,0 +1,27 @@
+name: Report a problem
+description: Something doesn't install, crashes, or gives a wrong result.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: How to repeat it
+      description: The commands you ran, or the steps in the web page.
+      render: shell
+  - type: input
+    id: setup
+    attributes:
+      label: Setup
+      description: For example "Windows 11, Python 3.11, no Docker" or "Raspberry Pi 5, Docker".
+  - type: textarea
+    id: log
+    attributes:
+      label: Error message or log (optional)
+      render: text

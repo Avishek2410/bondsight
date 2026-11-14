@@ -1,0 +1,52 @@
+# BondSight inspector configuration (example).
+# Paths are relative to this file. Copy it to config.yaml and edit.
+
+model: models/wirebond_dfine_small_m3k.onnx    # the .json with the same name must sit next to it
+threshold: 0.3            # findings below this confidence are ignored (M3j: 0.3 = ~30% false alarms on NTUST)
+data_dir: data            # SQLite database + saved images
+# layout: products/my_product_layout.json   # optional wire map for real cameras
+
+# Optional second opinion: an anomaly checker that only knows GOOD units and flags anything
+# unusual ("please check"). Build its memory once:  wbinspect-fit-anomaly --config config.yaml
+# anomaly:
+#   backbone: models/anomaly_backbone.onnx    # from tools/export_anomaly_backbone.py
+#   dir: models/anomaly                       # one <camera name>.npz per camera
+
+bind: 127.0.0.1           # only this computer can open the page; use 0.0.0.0 to allow the LAN
+port: 8080
+
+tracker:                  # "repetitive" = same wire + same defect in k of the last m units
+  k: 3
+  m: 10
+
+trigger:
+  mode: manual            # manual = press Inspect;  interval = inspect every `seconds`
+  seconds: 5
+
+cameras:
+  # Two simulated cameras looking at the SAME synthetic unit from two angles.
+  # Wire 5 has a wire_sweep in 60% of units, so a "repetitive" alert should appear.
+  - name: top
+    type: generator
+    view: top
+    options:
+      product_seed: 7
+      n_wires: 24
+      injection: {mode: repetitive, wire: 5, cls: wire_sweep, fraction: 0.6, random_p: 0.02}
+  - name: angled
+    type: generator
+    view: angled
+    options:
+      product_seed: 7
+      n_wires: 24
+      injection: {mode: repetitive, wire: 5, cls: wire_sweep, fraction: 0.6, random_p: 0.02}
+
+  # Other camera types (uncomment to use):
+  # - name: photos
+  #   type: folder
+  #   view: top
+  #   options: {path: incoming/top, pattern: "*.jpg,*.png"}
+  # - name: usb_microscope
+  #   type: opencv
+  #   view: top
+  #   options: {source: 0, width: 1920, height: 1080}     # or source: rtsp://user:pass@ip/stream

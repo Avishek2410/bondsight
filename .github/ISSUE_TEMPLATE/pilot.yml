@@ -1,0 +1,29 @@
+name: Pilot on my line
+description: You'd like to try BondSight on your own wire-bonded parts.
+labels: [pilot]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest. Please don't attach photos you aren't allowed to share; a short
+        description is enough to start the conversation.
+  - type: input
+    id: product
+    attributes:
+      label: What do you bond?
+      description: For example "QFN, gold ball bonds, 25 µm wire" or "power modules, aluminium wedge bonds".
+    validations:
+      required: true
+  - type: textarea
+    id: inspection
+    attributes:
+      label: How are the bonds inspected today?
+      description: Microscope, AOI machine, X-ray, sampling rate, which defects matter most.
+  - type: input
+    id: cameras
+    attributes:
+      label: Cameras and lighting you could use
+  - type: textarea
+    id: goal
+    attributes:
+      label: What would make a pilot worth it for you?

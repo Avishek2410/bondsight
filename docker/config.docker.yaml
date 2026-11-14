@@ -1,0 +1,22 @@
+# Example config for Docker: copy to docker/config.yaml. Paths are inside the container.
+model: /models/wirebond_dfine_small_m3k.onnx
+threshold: 0.3
+data_dir: /data
+database: postgresql+psycopg://wb@postgres:5432/wirebond   # password comes from WBI_DB_PASSWORD (docker/.env)
+# anomaly: {backbone: /models/anomaly_backbone.onnx, dir: /models/anomaly}   # optional second opinion
+port: 8080
+tracker: {k: 3, m: 10}
+trigger: {mode: manual, seconds: 5}
+cameras:
+  - name: top
+    type: generator
+    view: top
+    options:
+      product_seed: 7
+      injection: {mode: repetitive, wire: 5, cls: wire_sweep, fraction: 0.6, random_p: 0.02}
+  - name: angled
+    type: generator
+    view: angled
+    options:
+      product_seed: 7
+      injection: {mode: repetitive, wire: 5, cls: wire_sweep, fraction: 0.6, random_p: 0.02}

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BondSight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="machine">
+  <header class="head">
+    <div class="plate"><div class="t">BONDSIGHT</div><div class="s" id="station">STATION</div></div>
+    <nav class="tabs" aria-label="Pages">
+      <a class="tab" id="tab-inspect" href="#inspect">Inspect</a>
+      <a class="tab" id="tab-check" href="#check">Check a photo</a>
+      <a class="tab" id="tab-review" href="#review">Review <span class="count" id="undecided-count"></span></a>
+      <span class="tab off" title="Coming in a later version" aria-disabled="true">Reports</span>
+      <span class="tab off" title="Coming in a later version" aria-disabled="true">Setup</span>
+    </nav>
+    <div class="lamps" id="lamps"></div>
+    <button class="who" id="who" type="button">Who is inspecting?</button>
+  </header>
+
+  <div class="errbar" id="errbar" role="alert" hidden></div>
+  <div class="demo-note" id="demo-note" hidden><b>Online demo.</b> Nothing you upload is saved. Research prototype: trained on synthetic and
+    public photos; it can miss defects or flag good wires. Not for production decisions.</div>
+
+  <div class="rail">
+    <div class="cell"><small>Model</small><b id="r-model">–</b></div>
+    <div class="cell"><small>Line units</small><b id="r-units">–</b></div>
+    <div class="cell"><small>Defects / check (last 200)</small><b id="r-dc">–</b></div>
+    <div class="cell"><small>Last cycle</small><b id="r-cycle">–</b></div>
+    <div class="cell grow"><small>Database</small><b id="r-db">–</b></div>
+  </div>
+
+  <!-- ===== Inspect ===== -->
+  <section id="page-inspect" class="page">
+    <div class="grid">
+      <div class="panel tower" aria-label="Status light">
+        <span class="screw s1"></span><span class="screw s2"></span>
+        <div class="seg r" id="lamp-r"></div><div class="seg a" id="lamp-a"></div><div class="seg g" id="lamp-g"></div>
+        <div class="pole"></div><div class="base"></div><small>STATUS</small>
+      </div>
+
+      <div class="panel stage" id="stage">
+        <span class="screw s1"></span><span class="screw s2"></span><span class="screw s3"></span><span class="screw s4"></span>
+        <button class="key back" id="back" type="button" hidden>Back to photos</button>
+        <div class="views" id="views" role="group" aria-label="View"></div>
+        <div class="stage-body" id="stage-body"><div class="empty">Press <b>INSPECT NEXT</b> or check a photo.</div></div>
+        <div class="taglines" id="taglines"></div>
+      </div>
+
+      <div class="panel side">
+        <span class="screw s1"></span><span class="screw s2"></span>
+        <div class="verdict" id="verdict"><div class="v">READY</div><div class="m">No unit yet</div></div>
+        <div class="readout" id="readout"></div>
+        <div class="keys" id="keys"></div>
+        <button class="key go" id="inspect-next" type="button">INSPECT NEXT</button>
+        <label class="slot" id="side-slot">
+          <input type="file" accept="image/*" multiple hidden id="side-files">
+          <b>CHECK A PHOTO</b><span>Drop a photo here, or tap to choose a file or use the tablet camera</span>
+        </label>
+      </div>
+    </div>
+    <div class="panel log" id="log" aria-label="Recent units"></div>
+  </section>
+
+  <!-- ===== Check a photo ===== -->
+  <section id="page-check" class="page" hidden>
+    <div class="panel check-top">
+      <label class="slot big" id="drop">
+        <input type="file" accept="image/*" multiple hidden id="files">
+        <b>DROP PHOTOS HERE</b><span>up to 20 at a time, JPG / PNG / BMP / TIFF, 30 MB each</span>
+      </label>
+      <div class="check-actions">
+        <label class="key"><input type="file" accept="image/*" multiple hidden id="files2">Choose photos</label>
+        <label class="key"><input type="file" accept="image/*" capture="environment" hidden id="camera-in">Use camera</label>
+        <label class="memory">Unusual-spot memory of camera
+          <select id="memory"><option value="">none</option></select></label>
+        <div class="progress" id="progress" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="panel samples" id="samples" hidden>
+      <b>No photo at hand? Try one of ours</b> <span>(drawn by this project's own generator)</span>
+      <div class="sample-row" id="sample-row"></div>
+    </div>
+    <div class="cards" id="results"></div>
+  </section>
+
+  <!-- ===== Review ===== -->
+  <section id="page-review" class="page" hidden>
+    <div class="chips" id="chips" role="group" aria-label="Filter"></div>
+    <div class="panel list" id="review-list"></div>
+    <button class="key more" id="more" type="button" hidden>Load older</button>
+  </section>
+
+  <footer>Research prototype: trained mostly on synthetic and public photos; not validated for production use.</footer>
+</div>
+
+<!-- operator name -->
+<div class="modal" id="op-modal" hidden>
+  <form class="dialog panel" id="op-form">
+    <h2>Who is inspecting?</h2>
+    <p>Your name is saved with every decision you make.</p>
+    <input id="op-name" maxlength="60" autocomplete="name" required>
+    <div class="row2"><button class="key" type="button" id="op-cancel">Cancel</button><button class="key go" type="submit">Save</button></div>
+  </form>
+</div>
+
+<!-- defect type for a missed box -->
+<div class="modal" id="cls-modal" hidden>
+  <div class="dialog panel">
+    <h2>What did the AI miss?</h2>
+    <div class="cls-grid" id="cls-grid"></div>
+    <button class="key" type="button" id="cls-cancel">Cancel</button>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

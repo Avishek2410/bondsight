@@ -1,0 +1,580 @@
+<!doctype html>
+<!--
+  BondSight figure studio: every chart, diagram and annotated photo in the docs, drawn here and
+  captured as PNG by tools/figures/render.py (headless Chrome, 2x, transparent outside the card).
+
+  Serve the repo root (python -m http.server 8765) and open
+    /docs/brand/figures.html?fig=results            light
+    /docs/brand/figures.html?fig=results&theme=dark dark
+  Data: /out/figdata.json (tools/figures/export_data.py). Pictures: /demo/samples, /docs/images.
+-->
+<html><head><meta charset="utf-8">
+<title>BondSight figures</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --card:#FFFFFF;--card2:#F6F7F9;--well:#EEF0F3;--line:#E3E6EA;--ink:#12161B;--mute:#5E6875;--faint:#8A939F;
+  --gold:#B9800A;--goldHi:#D99E1F;--goldLo:#A06C00;--goldInk:#8A5D00;--goldWash:#FFF6E2;
+  --slate:#A9B3BF;--blue:#2F6FC0;--blueWash:#EAF2FC;--copper:#C15B2C;--copperWash:#FCEEE7;
+  --red:#D93A40;--green:#1E9E63;--amber:#E09100;--shadow:0 1px 2px #0d11170f,0 8px 28px #0d11171a;
+}
+:root[data-theme=dark]{
+  --card:#12171E;--card2:#18202A;--well:#0E1318;--line:#252D37;--ink:#EAEEF3;--mute:#9AA4B1;--faint:#6B7582;
+  --gold:#BA8714;--goldHi:#EDBE5A;--goldLo:#B5800F;--goldInk:#F0C463;--goldWash:#2A2212;
+  --slate:#4C5767;--blue:#4F8FDB;--blueWash:#14243A;--copper:#D8703F;--copperWash:#2E1B12;
+  --red:#E5484D;--green:#3CC487;--amber:#F2A83B;--shadow:0 1px 2px #0006,0 10px 30px #0008;
+}
+html,body{margin:0;background:transparent;font-family:Archivo,"Segoe UI",sans-serif;color:var(--ink)}
+*{box-sizing:border-box}
+#fig{position:absolute;inset:18px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden}
+#fig.bare{background:transparent;border:0;box-shadow:none;inset:0}
+.hd{padding:30px 40px 0;position:relative}
+.hd h2{margin:0;font-size:27px;font-weight:800;letter-spacing:-.005em;font-stretch:96%}
+.hd p{margin:7px 0 0;font-size:15.5px;color:var(--mute);line-height:1.4;max-width:1100px}
+.hd .rule{position:absolute;left:40px;top:0;width:56px;height:4px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--goldHi),var(--gold))}
+.bd{flex:1;position:relative;padding:14px 40px 0;min-height:0}
+.ft{display:flex;justify-content:space-between;align-items:center;padding:12px 40px 16px;font-size:12.5px;color:var(--faint)}
+.mark{font-weight:900;font-stretch:72%;font-size:15px;letter-spacing:.04em;color:var(--mute)}
+.mark b{color:var(--gold)}
+svg text{font-family:Archivo,"Segoe UI",sans-serif}
+.tick text{fill:var(--mute);font-size:13px}
+.tick line{stroke:var(--line)}
+.num{font-stretch:75%;font-weight:800}
+.lg{display:flex;gap:22px;font-size:13.5px;color:var(--mute);position:absolute;right:40px;top:36px}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+/* diagrams */
+.row{display:flex;align-items:stretch;gap:0;height:100%}
+.stage{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;position:relative;display:flex;flex-direction:column}
+.stage.ai{background:linear-gradient(180deg,var(--goldWash),var(--card2) 70%);border-color:color-mix(in srgb,var(--gold) 45%,var(--line))}
+.stage.cam{background:linear-gradient(180deg,var(--blueWash),var(--card2) 70%);border-color:color-mix(in srgb,var(--blue) 40%,var(--line))}
+.stage.gen{background:linear-gradient(180deg,var(--copperWash),var(--card2) 70%);border-color:color-mix(in srgb,var(--copper) 40%,var(--line))}
+.stage h3{margin:0;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+.stage h3 .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;background:var(--slate)}
+.stage.ai h3 .n{background:var(--gold)} .stage.cam h3 .n{background:var(--blue)} .stage.gen h3 .n{background:var(--copper)}
+.stage p{margin:6px 0 0;font-size:14px;color:var(--mute);line-height:1.38}
+.stage .pic{margin-top:12px;border-radius:9px;overflow:hidden;position:relative;background:var(--well);border:1px solid var(--line)}
+.stage .pic img{display:block;width:100%}
+.arrow{width:46px;flex:none;display:grid;place-items:center;color:var(--faint)}
+.box{position:absolute;border:2.5px solid var(--red);border-radius:3px;box-shadow:0 0 10px color-mix(in srgb,var(--red) 60%,transparent)}
+.tag{position:absolute;background:var(--red);color:#fff;font-weight:800;font-stretch:85%;font-size:11.5px;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.btn{border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700;text-align:center;border:1px solid var(--line);background:var(--card)}
+.ico{width:22px;height:22px;flex:none}
+.lamp{display:flex;flex-direction:column;gap:4px}
+.lamp i{display:block;width:16px;height:12px;border-radius:3px;opacity:.22}
+.cap{font-size:12.5px;color:var(--faint);margin-top:6px}
+.big{font-size:44px;font-weight:900;font-stretch:72%;line-height:1}
+</style></head><body>
+<div id="fig"><div class="hd"><div class="rule"></div><h2 id="t"></h2><p id="s"></p></div><div class="bd" id="bd"></div>
+<div class="ft"><span id="src"></span><span class="mark">BOND<b>SIGHT</b></span></div></div>
+<script>
+const Q=new URLSearchParams(location.search);
+const FIG=Q.get("fig")||"results";
+if(Q.get("theme")==="dark")document.documentElement.dataset.theme="dark";
+if(Q.get("w")){const f=document.getElementById("fig");f.style.right="auto";f.style.bottom="auto";f.style.width=(Q.get("w")-36)+"px";f.style.height=(Q.get("h")-36)+"px"}
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
+const $=s=>document.querySelector(s);
+function head(t,s,src){$("#t").textContent=t;$("#s").innerHTML=s||"";$("#src").innerHTML=src||""}
+function svgBody(m={t:20,r:20,b:44,l:56}){
+  const bd=$("#bd"),W=bd.clientWidth-80,H=bd.clientHeight-6;
+  const svg=d3.select(bd).append("svg").attr("width",W).attr("height",H).style("overflow","visible");
+  const defs=svg.append("defs");
+  const gv=defs.append("linearGradient").attr("id","goldV").attr("x1",0).attr("x2",0).attr("y1",0).attr("y2",1);
+  gv.append("stop").attr("offset",0).attr("stop-color",css("goldHi"));gv.append("stop").attr("offset",1).attr("stop-color",css("goldLo"));
+  const gh=defs.append("linearGradient").attr("id","goldH");
+  gh.append("stop").attr("offset",0).attr("stop-color",css("goldLo"));gh.append("stop").attr("offset",1).attr("stop-color",css("goldHi"));
+  const ga=defs.append("linearGradient").attr("id","goldA").attr("x1",0).attr("x2",0).attr("y1",0).attr("y2",1);
+  ga.append("stop").attr("offset",0).attr("stop-color",css("gold")).attr("stop-opacity",.28);ga.append("stop").attr("offset",1).attr("stop-color",css("gold")).attr("stop-opacity",0);
+  const f=defs.append("filter").attr("id","glow").attr("x","-30%").attr("y","-30%").attr("width","160%").attr("height","160%");
+  f.append("feGaussianBlur").attr("stdDeviation",6).attr("result","b");
+  const mg=f.append("feMerge");mg.append("feMergeNode").attr("in","b");mg.append("feMergeNode").attr("in","SourceGraphic");
+  const g=svg.append("g").attr("transform",`translate(${m.l},${m.t})`);
+  return {svg,g,w:W-m.l-m.r,h:H-m.t-m.b};
+}
+function yAxis(g,y,w,fmt=d=>d,ticks=5){
+  const a=g.append("g").call(d3.axisLeft(y).ticks(ticks).tickSize(-w).tickFormat(fmt).tickPadding(10));
+  a.select(".domain").remove();a.selectAll(".tick line").attr("stroke",css("line"));return a}
+function xAxis(g,x,h,fmt,ticks){
+  const a=g.append("g").attr("transform",`translate(0,${h})`).call(d3.axisBottom(x).ticks(ticks).tickSize(0).tickPadding(12).tickFormat(fmt));
+  a.select(".domain").attr("stroke",css("line"));return a}
+function txt(g,x,y,s,o={}){const t=g.append("text").attr("x",x).attr("y",y).text(s).attr("fill",o.fill||css("ink"))
+  .attr("font-size",o.size||14).attr("font-weight",o.w||400).attr("text-anchor",o.a||"start");if(o.cls)t.attr("class",o.cls);if(o.st)t.style("font-stretch",o.st);return t}
+function bar(g,x,y,w,h,fill,r=5){ // rounded data end, square at the baseline
+  if(h<=0)return;const p=`M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;
+  return g.append("path").attr("d",p).attr("fill",fill)}
+function hbar(g,x,y,w,h,fill,r=5){if(w<=0)return;const p=`M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`;
+  return g.append("path").attr("d",p).attr("fill",fill)}
+const ICON={
+ cam:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.6"/></svg>',
+ chip:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>',
+ eye:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ user:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+ db:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>',
+ gpu:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 18a5 5 0 0 1-.6-9.96A6 6 0 0 1 18 8.5a4.5 4.5 0 0 1-.5 9.5z"/><path d="M9 14h6"/></svg>',
+ tab:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+ pen:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>',
+ photo:'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>',
+};
+const ARROW=`<div class="arrow"><svg width="34" height="20" viewBox="0 0 34 20"><path d="M2 10h26M21 3l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+
+/* ======================================================================== charts */
+const F={};
+F.results=d=>{
+  head("Real defects found and good boards wrongly flagged, model by model",
+       "Left: share of real NTUST defects found on test photos no model saw. Right: share of complete, good hawk-team boards wrongly flagged.",
+       "Measured on held-out photos from public data sets (CC BY 4.0) · each model at its chosen confidence level");
+  const {svg,g,w,h}=svgBody({t:78,r:10,b:58,l:46});
+  const gap=90,wl=(w-gap)*0.6,wr=w-gap-wl;
+  function panel(ox,pw,data,title,good){
+    const p=g.append("g").attr("transform",`translate(${ox},0)`);
+    const x=d3.scaleBand().domain(data.map(r=>r[0])).range([0,pw]).padding(.36);
+    const y=d3.scaleLinear().domain([0,100]).range([h,0]);
+    yAxis(p,y,pw,d=>d+"%",4);
+    txt(p,0,-56,title,{size:16,w:800});
+    data.forEach(([m,sub,v])=>{
+      const now=m==="M3k-small",bx=x(m),bw=x.bandwidth();
+      if(now) p.append("rect").attr("x",bx-8).attr("y",-6).attr("width",bw+16).attr("height",h+6+50).attr("rx",12)
+        .attr("fill",css("goldWash")).attr("stroke",css("gold")).attr("stroke-opacity",.35);
+      bar(p,bx,y(v),bw,h-y(v),now?"url(#goldV)":css("slate"),6);
+      if(v===0) p.append("rect").attr("x",bx).attr("y",h-3).attr("width",bw).attr("height",3).attr("rx",1.5).attr("fill",now?css("gold"):css("slate"));
+      txt(p,bx+bw/2,y(v)-12,v+"%",{a:"middle",size:now?34:26,w:800,cls:"num",fill:now?css("goldInk"):css("ink")});
+      txt(p,bx+bw/2,h+24,m==="M3k-small"?"BondSight":m,{a:"middle",size:15,w:now?800:600,fill:now?css("goldInk"):css("ink")});
+      if(sub&&!now)txt(p,bx+bw/2,h+43,sub,{a:"middle",size:13,fill:css("mute")});
+      if(now)txt(p,bx+bw/2,h+43,"M3k-small",{a:"middle",size:13,fill:css("mute")});
+    });
+    return {x,y,p};
+  }
+  const L=panel(0,wl,d.found,"Real defects found  ·  higher is better");
+  const R=panel(wl+gap,wr,d.flagged,"Good boards wrongly flagged  ·  lower is better");
+  // callouts
+  const c=R.p.append("g").attr("transform",`translate(${R.x("M3k-small")+R.x.bandwidth()/2},${R.y(46)})`);
+  c.append("text").attr("text-anchor","middle").attr("class","num").attr("font-size",22).attr("font-weight",800).attr("fill",css("goldInk")).text("none flagged");
+  c.append("text").attr("y",22).attr("text-anchor","middle").attr("font-size",13.5).attr("fill",css("mute")).text("down from every board");
+};
+
+F.sweep=d=>{
+  const s=d.sweep;
+  head("BondSight against the previous model across confidence levels",
+       `Each dot is one confidence level, from 0.10 (right, finds most, more false alarms) to 0.85 (left). Up and to the left is better. ${s.n_images} real NTUST test photos.`,
+       "A defect counts as found when a box of the right type overlaps it (IoU ≥ 0.3) · a good wire counts as flagged when any box overlaps it");
+  const {g,w,h}=svgBody({t:16,r:190,b:58,l:58});
+  const x=d3.scaleLinear().domain([0,80]).range([0,w]),y=d3.scaleLinear().domain([30,90]).range([h,0]);
+  yAxis(g,y,w,d=>d+"%",6);xAxis(g,x,h,d=>d+"%",8);
+  txt(g,w/2,h+48,"good wires wrongly boxed (false alarms)",{a:"middle",size:13.5,fill:css("mute")});
+  txt(g,-46,-2,"defects found",{size:13.5,fill:css("mute")});
+  // better corner
+  const bc=g.append("g").attr("transform",`translate(${x(4)},${y(87)})`);
+  bc.append("path").attr("d","M34 18 L4 2 M4 2 l11 1 M4 2 l4 10").attr("stroke",css("faint")).attr("stroke-width",1.8).attr("fill","none").attr("stroke-linecap","round");
+  txt(bc,42,24,"better",{size:13.5,w:700,fill:css("faint")});
+  const P=(r)=>[x(100*r[2]),y(100*r[1])];
+  for(const [name,col,now] of [["M3j",css("slate"),0],["M3k-small",css("gold"),1]]){
+    const pts=s[name].map(P);
+    if(now){g.append("path").attr("d",d3.area().x(p=>p[0]).y0(h).y1(p=>p[1]).curve(d3.curveMonotoneX)([...pts].sort((a,b)=>a[0]-b[0]))).attr("fill","url(#goldA)")}
+    g.append("path").attr("d",d3.line().curve(d3.curveCatmullRom.alpha(.5))(pts)).attr("fill","none").attr("stroke",col).attr("stroke-width",now?3.4:2.6).attr("stroke-linecap","round");
+    pts.forEach(p=>g.append("circle").attr("cx",p[0]).attr("cy",p[1]).attr("r",now?5.5:4.5).attr("fill",col).attr("stroke",css("card")).attr("stroke-width",2));
+    const e=pts[0];
+    txt(g,e[0]+14,e[1]+(now?-6:16),now?"BondSight":"M3j (previous)",{size:16,w:800,fill:now?css("goldInk"):css("mute")});
+    if(now)txt(g,e[0]+14,e[1]+12,"M3k-small",{size:13,fill:css("mute")});
+  }
+  s["M3k-small"].forEach(r=>{ if([0.2,0.3,0.5,0.7].includes(r[0])){const p=P(r);
+    const lab=g.append("g").attr("transform",`translate(${p[0]},${p[1]-18})`);
+    lab.append("rect").attr("x",-17).attr("y",-13).attr("width",34).attr("height",19).attr("rx",9.5).attr("fill",css("card")).attr("stroke",css("gold"));
+    txt(lab,0,1.5,r[0].toFixed(1),{a:"middle",size:12,w:700,fill:css("goldInk")});}});
+};
+
+F.curves=d=>{
+  head("Validation loss during training",
+       "Loss on validation pictures the model never learns from, after each pass over the 6,367-picture mix. The kept model is the best epoch, marked.",
+       "Kaggle T4 GPU · AdamW, lr 2e-4, one-cycle schedule · 12 epochs per model");
+  const {g,w,h}=svgBody({t:16,r:30,b:58,l:50});
+  const x=d3.scaleLinear().domain([1,12]).range([0,w]),y=d3.scaleLinear().domain([0,9]).range([h,0]);
+  g.append("rect").attr("x",x(6.5)).attr("y",0).attr("width",x(12)-x(6.5)+10).attr("height",h).attr("fill",css("well")).attr("rx",8);
+  yAxis(g,y,w,d=>d,5);xAxis(g,x,h,d=>d,12);
+  txt(g,w/2,h+48,"epoch",{a:"middle",size:13.5,fill:css("mute")});
+  txt(g,(x(6.5)+x(12))/2,28,"after the best epoch, the loss stops improving:",{a:"middle",size:13.5,fill:css("mute")});
+  txt(g,(x(6.5)+x(12))/2,47,"more passes would only memorise the pictures",{a:"middle",size:13.5,fill:css("mute")});
+  for(const [m,col,best,lab] of [["nano",css("slate"),4,"D-FINE Nano"],["small",css("gold"),6,"D-FINE Small · BondSight"]]){
+    const pts=d.history[m].map(r=>[x(r[0]),y(Math.min(r[2],9.4))]);
+    const now=m==="small";
+    g.append("path").attr("d",d3.line().curve(d3.curveMonotoneX)(pts)).attr("fill","none").attr("stroke",col).attr("stroke-width",now?3.4:2.6);
+    pts.forEach((p,i)=>{ if(d.history[m][i][2]<=9) g.append("circle").attr("cx",p[0]).attr("cy",p[1]).attr("r",now?5:4).attr("fill",col).attr("stroke",css("card")).attr("stroke-width",2)});
+    const b=d.history[m][best-1][2],bx=x(best),by=y(b);
+    g.append("circle").attr("cx",bx).attr("cy",by).attr("r",13).attr("fill","none").attr("stroke",now?css("gold"):css("mute")).attr("stroke-width",2);
+    const ly=y(now?4.9:6.6);
+    g.append("path").attr("d",`M${bx},${by-13}V${ly+26}`).attr("stroke",css("faint")).attr("stroke-width",1.2);
+    txt(g,bx,ly,lab,{a:"middle",size:15,w:800,fill:now?css("goldInk"):css("ink")});
+    txt(g,bx,ly+19,`best: epoch ${best}, loss ${b.toFixed(2)}`,{a:"middle",size:13.5,fill:css("mute")});
+  }
+  txt(g,x(1.45),y(8.55),"↖ Nano starts at 27.4, off the chart",{size:13,fill:css("mute")});
+};
+
+F.mix=d=>{
+  const tot=d3.sum(d.mix,r=>r[1]),gen=d3.sum(d.mix.filter(r=>r[0].startsWith("Generated")),r=>r[1]);
+  head(`What the model sees in each epoch: ${tot.toLocaleString("en")} pictures`,
+       "A fresh random sample is drawn every epoch, so over 12 epochs the model sees much more than one pass of any set.",
+       "Real photos: public data sets under CC BY 4.0 (credits in CREDITS.md) · ×2 = each picture used twice per epoch");
+  const {g,w,h}=svgBody({t:70,r:80,b:20,l:300});
+  // share strip
+  const sx=d3.scaleLinear().domain([0,tot]).range([0,w]);
+  txt(g,-300+2,-44,"Share",{size:14,w:700,fill:css("mute")});
+  hbar(g,0,-60,sx(tot-gen)-2,22,css("blue"),0);g.select("path:last-child").attr("rx",4);
+  g.append("rect").attr("x",sx(tot-gen)+2).attr("y",-60).attr("width",sx(gen)-2).attr("height",22).attr("fill",css("copper"));
+  txt(g,8,-44,`real photos ${Math.round(100*(tot-gen)/tot)}%`,{size:13,w:700,fill:"#fff"});
+  txt(g,sx(tot-gen)+10,-44,`generated ${Math.round(100*gen/tot)}%`,{size:13,w:700,fill:"#fff"});
+  const rows=[...d.mix].sort((a,b)=>b[1]-a[1]);
+  const y=d3.scaleBand().domain(rows.map(r=>r[0])).range([0,h]).padding(.32);
+  const x=d3.scaleLinear().domain([0,1900]).range([0,w]);
+  rows.forEach(([n,v])=>{const gen=n.startsWith("Generated");
+    g.append("rect").attr("x",0).attr("y",y(n)).attr("width",w).attr("height",y.bandwidth()).attr("rx",5).attr("fill",css("card2"));
+    hbar(g,0,y(n),x(v),y.bandwidth(),gen?css("copper"):css("blue"),5);
+    txt(g,-16,y(n)+y.bandwidth()/2+5,n,{a:"end",size:14.5,w:600});
+    txt(g,x(v)+10,y(n)+y.bandwidth()/2+6,v.toLocaleString("en"),{size:17,w:800,cls:"num"});
+  });
+};
+
+F.levels=d=>{
+  const rows=Object.entries(d.levels).sort((a,b)=>b[1]-a[1]);
+  head("Confidence level for each defect type",
+       "Chosen on validation pictures for the best balance of found and wrongly boxed (F1). A box below its type's level is ignored.",
+       "Types with fewer than 8 validation examples keep the default 0.30 · levels stored in the model's .json next to the .onnx");
+  const {g,w,h}=svgBody({t:24,r:60,b:44,l:170});
+  const x=d3.scaleLinear().domain([0,1]).range([0,w]),y=d3.scaleBand().domain(rows.map(r=>r[0])).range([0,h]).padding(.3);
+  xAxis(g,x,h,d=>d.toFixed(1),10);
+  g.selectAll(null).data(x.ticks(10)).enter().append("line").attr("x1",x).attr("x2",x).attr("y1",0).attr("y2",h).attr("stroke",css("line"));
+  g.append("line").attr("x1",x(.3)).attr("x2",x(.3)).attr("y1",-14).attr("y2",h).attr("stroke",css("mute")).attr("stroke-dasharray","5 5").attr("stroke-width",1.5);
+  txt(g,x(.3)+8,-4,"one level for all (before)",{size:13,fill:css("mute")});
+  rows.forEach(([k,v])=>{const cy=y(k)+y.bandwidth()/2;
+    g.append("line").attr("x1",0).attr("x2",x(v)).attr("y1",cy).attr("y2",cy).attr("stroke",css("gold")).attr("stroke-opacity",.55).attr("stroke-width",5).attr("stroke-linecap","round");
+    g.append("circle").attr("cx",x(v)).attr("cy",cy).attr("r",9).attr("fill",css("gold")).attr("stroke",css("card")).attr("stroke-width",3);
+    txt(g,-16,cy+5,k.replace(/_/g," "),{a:"end",size:14.5,w:600});
+    txt(g,x(v)+18,cy+6,v.toFixed(2),{size:17,w:800,cls:"num",fill:css("goldInk")});
+  });
+};
+
+F.checker=d=>{
+  const c=d.checker,lvl=1;
+  const caught=c.defect.filter(v=>v>lvl).length,gf=c.good.filter(v=>v>lvl).length;
+  head("Unusual-spot scores for good and faulty units",
+       "For each unit, the most unusual spot across both cameras, divided by that camera's alarm level. Anything right of 1.0 raises an alarm.",
+       "Generated units of one product, not used to build the checker's memory of good patches");
+  const {g,w,h}=svgBody({t:20,r:30,b:58,l:44});
+  const lo=0.8,hi=1.75,x=d3.scaleLinear().domain([lo,hi]).range([0,w]);
+  const bins=d3.bin().domain([lo,hi]).thresholds(d3.range(lo,hi,0.035));
+  const bg=bins(c.good),bd=bins(c.defect);
+  const y=d3.scaleLinear().domain([0,d3.max([...bg,...bd],b=>b.length)+1]).range([h,0]);
+  g.append("rect").attr("x",x(lvl)).attr("y",0).attr("width",w-x(lvl)).attr("height",h).attr("fill",css("red")).attr("opacity",.06);
+  yAxis(g,y,w,d=>d,4);xAxis(g,x,h,d=>d.toFixed(1),10);
+  txt(g,w/2,h+48,"most unusual spot ÷ alarm level",{a:"middle",size:13.5,fill:css("mute")});
+  txt(g,-34,-6,"units",{size:13.5,fill:css("mute")});
+  const bw=x(bins.thresholds?lo+0.035:lo+0.035)-x(lo);
+  for(const [B,col,k] of [[bg,css("blue"),0],[bd,css("red"),1]]){
+    B.forEach(b=>{const bw2=(x(b.x1)-x(b.x0)-4)/2; if(b.length) bar(g,x(b.x0)+2+k*bw2,y(b.length),bw2,h-y(b.length),col,3)});
+  }
+  g.append("line").attr("x1",x(lvl)).attr("x2",x(lvl)).attr("y1",-6).attr("y2",h).attr("stroke",css("ink")).attr("stroke-width",2).attr("stroke-dasharray","6 5");
+  txt(g,x(lvl)+10,10,"alarm level",{size:14,w:800});
+  const card=(cx,cy,col,n,of,label)=>{const k=g.append("g").attr("transform",`translate(${cx},${cy})`);
+    k.append("rect").attr("width",250).attr("height",64).attr("rx",10).attr("fill",css("card")).attr("stroke",css("line"));
+    k.append("rect").attr("width",5).attr("height",64).attr("rx",2.5).attr("fill",col);
+    txt(k,20,40,`${n}/${of}`,{size:30,w:800,cls:"num"});txt(k,100,30,label[0],{size:13.5,w:700});txt(k,100,48,label[1],{size:13,fill:css("mute")});};
+  card(w-262,8,css("red"),caught,c.defect.length,["faulty units caught","above the level"]);
+  card(w-262,84,css("blue"),gf,c.good.length,["good units flagged","the price of catching more"]);
+  const lg=g.append("g").attr("transform",`translate(${x(lvl)+10},34)`);
+  [["good units",css("blue")],["units with a defect",css("red")]].forEach(([n,col],i)=>{lg.append("rect").attr("y",i*24).attr("width",13).attr("height",13).attr("rx",3).attr("fill",col);txt(lg,21,i*24+11.5,n,{size:13.5})});
+};
+
+F.repeat=d=>{
+  const r=d.repeat,n=r.units.length;
+  head(`Repeat alarm on one wire over 40 units`,
+       `${r.cls.replace(/_/g," ")} on ${r.position.replace(":"," ")} over the last ${n} units. An alarm goes up when it is found in 3 or more of the last 10 units: the sign of a drifting machine, not a one-off.`,
+       "Generated units on the PC station (product 7, injected drift) · alarms are kept in the database with the units");
+  const {g,w,h}=svgBody({t:40,r:10,b:40,l:10});
+  const cw=w/n,ch=56,y0=30;
+  r.units.forEach((u,i)=>{const x0=i*cw;
+    g.append("rect").attr("x",x0+2).attr("y",y0).attr("width",cw-4).attr("height",ch).attr("rx",6).attr("fill",u.hit?css("red"):css("card2")).attr("stroke",u.hit?"none":css("line"));
+    if(u.alarm){const a=g.append("g").attr("transform",`translate(${x0+cw/2},${y0-14})`);
+      a.append("path").attr("d","M0,-11 L10,7 L-10,7Z").attr("fill",css("amber")).attr("stroke",css("card")).attr("stroke-width",1.5);
+      txt(a,0,5,"!",{a:"middle",size:11,w:900,fill:"#111"});}
+    if(i%5===0)txt(g,x0+cw/2,y0+ch+24,"#"+u.no,{a:"middle",size:13,fill:css("mute")});
+  });
+  const lg=g.append("g").attr("transform",`translate(0,${y0+ch+50})`);
+  let lx=0;[["found on this wire",css("red"),"r"],["not found",css("card2"),"r"],["alarm raised",css("amber"),"t"]].forEach(([s,c,k])=>{
+    if(k==="r")lg.append("rect").attr("x",lx).attr("width",14).attr("height",14).attr("rx",3).attr("fill",c).attr("stroke",css("line"));
+    else lg.append("path").attr("d",`M${lx+7},0 L${lx+15},14 L${lx-1},14Z`).attr("fill",c);
+    txt(lg,lx+22,12,s,{size:13.5});lx+=s.length*7.6+60;});
+  txt(g,w,y0-28,`${r.units.filter(u=>u.alarm).length} alarms · ${r.units.filter(u=>u.hit).length} sightings`,{a:"end",size:14,w:700,fill:css("mute")});
+};
+
+F.speed=d=>{
+  head("Speed on a Raspberry Pi 5 and on a laptop CPU",
+       "Seconds per photo or per unit, CPU only. A unit is two cameras (top and angled) plus the unusual-spot check.",
+       "ONNX Runtime, 4 threads · D-FINE Small (M3k-small), 41 MB · measured 13 Nov 2026");
+  const {g,w,h}=svgBody({t:10,r:40,b:36,l:290});
+  const rows=[["One 2048-px photo","Raspberry Pi 5",3.1,1],["","laptop CPU",2.3,0],["One unit: 2 cameras + checker","Raspberry Pi 5",3.5,1]];
+  const x=d3.scaleLinear().domain([0,5]).range([0,w]),y=d3.scaleBand().domain(d3.range(3)).range([0,h]).paddingInner(.4).paddingOuter(.15);
+  xAxis(g,x,h,d=>d+" s",5);
+  g.selectAll(null).data(x.ticks(5)).enter().append("line").attr("x1",x).attr("x2",x).attr("y1",0).attr("y2",h).attr("stroke",css("line"));
+  rows.forEach(([n,dev,v,pi],i)=>{const yy=y(i);
+    hbar(g,0,yy,x(v),y.bandwidth(),pi?"url(#goldH)":css("slate"),6);
+    txt(g,x(v)+14,yy+y.bandwidth()/2+8,v.toFixed(1)+" s",{size:24,w:800,cls:"num",fill:pi?css("goldInk"):css("ink")});
+    txt(g,x(v)+70,yy+y.bandwidth()/2+6,dev,{size:14,fill:css("mute")});
+    if(n)txt(g,-18,i===0?(y(0)+y(1)+y.bandwidth())/2+5:yy+y.bandwidth()/2+6,n,{a:"end",size:15,w:700});
+  });
+};
+
+/* ======================================================================== diagrams */
+const IMG="/demo/samples/";
+F.how=d=>{
+  head("How BondSight works","From photo to verdict on the line. The gold loop is how the model gets retrained on your product.","");
+  $("#fig").querySelector(".ft").style.display="none";
+  $("#bd").innerHTML=`
+  <div class="row" style="height:398px">
+    <div class="stage cam"><h3><span class="n">1</span>Look</h3><p>Top and angled cameras, or an uploaded photo. Big photos are cut into 640&nbsp;px tiles.</p>
+      <div class="pic" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--line)"><img src="${IMG}good_top.jpg"><img src="${IMG}lifted_stitch_angled.jpg"></div>
+      <div style="margin-top:auto;display:flex;gap:6px;flex-wrap:wrap"><span class="chip">${ICON.cam}top</span><span class="chip">${ICON.cam}angled</span><span class="chip">${ICON.photo}upload</span></div></div>
+    ${ARROW}
+    <div class="stage ai"><h3><span class="n">2</span>Find</h3><p>The defect AI boxes each problem with its type and a confidence.</p>
+      <div class="pic"><img src="${IMG}wire_sweep_top.jpg"><div class="box" style="left:55.3%;top:5%;width:11%;height:31.4%"></div><div class="tag" style="left:42%;top:38%">wire sweep 72%</div></div>
+      <div class="cap">D-FINE Small · 8 defect types</div></div>
+    ${ARROW}
+    <div class="stage ai"><h3><span class="n">3</span>Second opinion</h3><p>The unusual-spot checker knows only good units, and lights up anything that differs.</p>
+      <div class="pic"><img src="/docs/brand/assets/spots-heat.jpg"></div>
+      <div class="cap">memory of 10,000 good patches</div></div>
+    ${ARROW}
+    <div class="stage gen"><h3><span class="n">4</span>Decide</h3><p>A clear verdict, and the operator's call on every finding.</p>
+      <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+        <div class="lamp"><i style="background:var(--red);opacity:1;box-shadow:0 0 12px var(--red)"></i><i style="background:var(--amber)"></i><i style="background:var(--green)"></i></div>
+        <div><div class="big" style="color:var(--red)">DEFECT</div><div class="cap" style="margin:2px 0 0">or OK · or CHECK</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px">
+        <div class="btn" style="color:var(--red)">Real defect</div><div class="btn">False alarm</div>
+        <div class="btn">Missed one</div><div class="btn" style="color:var(--green)">Looks good</div></div>
+      <div style="margin-top:auto"><span class="chip"><i style="background:var(--amber)"></i>repeat alarm: same wire, 3 of 10</span></div></div>
+    ${ARROW}
+    <div class="stage"><h3><span class="n">5</span>Remember</h3><p>Every unit, finding and decision is saved.</p>
+      <div style="display:grid;place-items:center;margin-top:14px;color:var(--mute)"><svg width="86" height="96" viewBox="0 0 24 27" fill="none" stroke="currentColor" stroke-width="1.1"><ellipse cx="12" cy="4" rx="9" ry="3"/><path d="M3 4v19c0 1.7 4 3 9 3s9-1.3 9-3V4M3 10.5c0 1.7 4 3 9 3s9-1.3 9-3M3 17c0 1.7 4 3 9 3s9-1.3 9-3"/></svg></div>
+      <div style="margin-top:12px;font-size:16px;font-weight:800;text-align:center">PostgreSQL</div>
+      <div class="cap" style="text-align:center">or SQLite on a single PC</div>
+      <div style="margin-top:auto;display:grid;gap:5px;font-size:13px;color:var(--mute)"><div>units · findings · decisions</div><div>one-click training export (COCO)</div></div></div>
+  </div>
+  <svg id="loop" style="position:absolute;left:0;top:0;overflow:visible" width="1" height="1"></svg>
+  <div id="looplab" style="position:absolute;left:50%;transform:translateX(-50%);top:450px;display:flex;align-items:center;gap:12px;background:var(--card);padding:0 16px;white-space:nowrap">
+    <span style="font-size:17px;font-weight:800;color:var(--goldInk)">Retraining</span>
+    <span style="font-size:14.5px;color:var(--mute)">retrain on your operators' decisions, then switch to the new model</span></div>`;
+  requestAnimationFrame(()=>{
+    const bd=$("#bd").getBoundingClientRect(),st=[...document.querySelectorAll(".stage")].map(e=>e.getBoundingClientRect());
+    const a=st[4],b=st[1],yb=a.bottom-bd.top,ly=464,x1=a.left+a.width/2-bd.left,x2=b.left+b.width/2-bd.left;
+    const s=d3.select("#loop");
+    s.append("path").attr("d",`M${x1},${yb+2} V${ly-14} Q${x1},${ly} ${x1-14},${ly} H${x2+14} Q${x2},${ly} ${x2},${ly-14} V${yb+12}`)
+     .attr("fill","none").attr("stroke",css("gold")).attr("stroke-width",3).attr("stroke-linecap","round");
+    s.append("path").attr("d",`M${x2-8},${yb+20} L${x2},${yb+6} L${x2+8},${yb+20}`).attr("fill","none").attr("stroke",css("gold")).attr("stroke-width",3).attr("stroke-linecap","round").attr("stroke-linejoin","round");
+  });
+};
+
+F.deploy=d=>{
+  head("What runs where","Everything runs on the station. The only thing that leaves it is the training export, and only when you send it.","");
+  $("#fig").querySelector(".ft").style.display="none";
+  $("#bd").innerHTML=`
+  <div style="display:grid;grid-template-columns:1.55fr 46px 1fr;grid-template-rows:440px;height:440px">
+   <div style="border:2px dashed color-mix(in srgb,var(--gold) 55%,var(--line));border-radius:16px;padding:18px 20px;position:relative;display:flex;flex-direction:column">
+     <div style="font-size:15px;font-weight:800;color:var(--goldInk)">Inspection station · Raspberry Pi 5 or any PC</div>
+     <div style="display:flex;align-items:center;gap:0;margin-top:10px;flex:1;min-height:0">
+       <div style="display:grid;gap:14px">
+         <div class="stage cam" style="flex:none;width:160px;padding:12px"><h3 style="font-size:15px">${ICON.cam}Top camera</h3><div class="pic" style="margin-top:8px;height:96px;background:url(${IMG}good_top.jpg) center/cover"></div></div>
+         <div class="stage cam" style="flex:none;width:160px;padding:12px"><h3 style="font-size:15px">${ICON.cam}Angled camera</h3><div class="pic" style="margin-top:8px;height:96px;background:url(${IMG}lifted_stitch_angled.jpg) center/cover"></div></div>
+       </div>
+       ${ARROW}
+       <div class="stage ai" style="flex:1.2;justify-content:center">
+         <svg viewBox="0 0 200 120" style="width:100%;max-height:150px"><rect x="8" y="8" width="184" height="104" rx="8" fill="#1d6b45" stroke="#0f4a2e"/>
+           <rect x="76" y="34" width="46" height="46" rx="3" fill="#2a2f35" stroke="#888"/><text x="99" y="62" fill="#ccc" font-size="9" text-anchor="middle" font-weight="700">BCM2712</text>
+           <rect x="22" y="22" width="34" height="24" rx="2" fill="#16191d"/><rect x="22" y="54" width="34" height="24" rx="2" fill="#16191d"/>
+           <rect x="140" y="20" width="40" height="30" rx="2" fill="#b9bcc2"/><rect x="140" y="58" width="40" height="30" rx="2" fill="#b9bcc2"/>
+           <g fill="#d4a52b">${Array.from({length:20},(_,i)=>`<circle cx="${30+i*7.3}" cy="104" r="1.8"/>`).join("")}</g></svg>
+         <div style="text-align:center;font-weight:800;font-size:18px;margin-top:6px">BondSight</div>
+         <div class="cap" style="text-align:center;margin-top:2px">Docker · CPU only · 3.5 s per unit</div></div>
+       ${ARROW}
+       <div class="stage" style="flex:.8;align-items:center;justify-content:center;color:var(--mute)">${ICON.db.replace('class="ico"','width="60" height="60"')}
+         <div style="font-weight:800;font-size:16px;color:var(--ink);margin-top:8px">PostgreSQL</div><div class="cap">your data stays here</div></div>
+     </div>
+   </div>
+   ${ARROW.replace('M2 10h26M21 3l8 7-8 7','M6 10h22M21 3l8 7-8 7M13 3l-8 7 8 7')}
+   <div style="display:grid;grid-template-rows:auto 38px 1fr;gap:0;min-height:0">
+     <div class="stage cam" style="padding:14px"><h3 style="font-size:15px">${ICON.tab}Tablet or screen on the line</h3>
+       <div class="pic" style="margin-top:10px;border-radius:8px;box-shadow:0 6px 18px #0003;height:200px;background:url(/docs/images/inspect.jpg) top center/cover"></div>
+       <div class="cap">a web page: no install, works on any browser</div></div>
+     <div style="display:flex;justify-content:center;gap:42px;height:38px;align-items:center;color:var(--faint);font-size:12.5px">
+       <span>↓ training export</span><span>new model (.onnx) ↑</span></div>
+     <div class="stage" style="padding:14px;border-style:dashed"><h3 style="font-size:15px">${ICON.gpu}GPU training notebooks</h3>
+       <p>Kaggle or Colab, a few hours. Optional: the station runs without them.</p></div>
+   </div>
+  </div>`;
+};
+
+F.pipeline=d=>{
+  head("From pictures to a station","Where the data comes from, how the model is trained, and what runs on the line.","");
+  $("#fig").querySelector(".ft").style.display="none";
+  const col=(title,sub,body,cls="")=>`<div class="stage ${cls}" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--mute)">${sub}</div><h3 style="font-size:21px;margin-top:2px">${title}</h3>${body}</div>`;
+  const item=(ic,a,b,c="")=>`<div style="display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:10px"><div style="color:${c||"var(--mute)"};margin-top:2px">${ic}</div><div><div style="font-weight:800;font-size:15.5px">${a}</div><div style="font-size:13.5px;color:var(--mute);margin-top:2px;line-height:1.35">${b}</div></div></div>`;
+  $("#bd").innerHTML=`<div class="row" style="height:380px">
+    ${col("Data","1 · collected and drawn",
+      `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px"><div class="pic" style="margin:0"><img src="${IMG}broken_wire_top.jpg"></div><div class="pic" style="margin:0"><img src="${IMG}macro_lifted_ball_top.jpg"></div></div>`+
+      item(ICON.pen,"Picture generator","9,200 labelled drawings, any defect on demand","var(--copper)")+
+      item(ICON.photo,"Public photos","6 sets of real wire bonds, CC BY 4.0","var(--blue)"),"cam")}
+    ${ARROW}
+    ${col("Training","2 · on a free cloud GPU",
+      item(ICON.chip,"Tiles and a mixed diet","6,367 pictures per epoch, cut into 640 px tiles")+
+      item(ICON.eye,"D-FINE Small","10.2 M parameters, fine-tuned for 12 epochs","var(--gold)")+
+      item(ICON.pen,"One level per defect type","picked for the best F1 on validation","var(--gold)"),"ai")}
+    ${ARROW}
+    ${col("Station","3 · on the line, CPU only",
+      item(ICON.chip,"ONNX model, 41 MB","runs on a Raspberry Pi 5","var(--gold)")+
+      item(ICON.db,"Unusual-spot memory","10,000 patches of good units","var(--gold)")+
+      `<div style="margin-top:auto;display:flex;gap:8px;justify-content:center"><span class="chip"><i style="background:var(--green)"></i>OK</span><span class="chip"><i style="background:var(--red)"></i>DEFECT</span><span class="chip"><i style="background:var(--amber)"></i>CHECK</span></div>`,"ai")}
+  </div>`;
+};
+
+F.dfine=d=>{
+  head("Inside the detector: D-FINE Small","One 640 × 640 tile goes in; 300 candidate boxes come out, each with a score for each of the 8 defect types.","");
+  $("#fig").querySelector(".ft").style.display="none";
+  const plate=(s,o,l)=>`<div style="position:absolute;left:${o}px;top:${o*0.6+20}px;width:${s}px;height:${s}px;border-radius:6px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 55%,var(--card)),color-mix(in srgb,var(--gold) 20%,var(--card)));border:1px solid var(--gold);transform:perspective(500px) rotateY(-28deg);box-shadow:0 6px 14px #0002"><span style="position:absolute;bottom:-20px;left:0;font-size:12px;color:var(--mute);white-space:nowrap">${l}</span></div>`;
+  const dots=Array.from({length:300},(_,i)=>{const hot=[37,38,57,141,142,222].includes(i);return `<i style="width:7px;height:7px;border-radius:50%;background:${hot?"var(--gold)":"var(--slate)"};opacity:${hot?1:.55};${hot?"box-shadow:0 0 6px var(--gold)":""}"></i>`}).join("");
+  const dist=(w,peak)=>Array.from({length:9},(_,i)=>{const v=Math.exp(-((i-peak)**2)/2.2);return `<i style="width:${w}px;height:${4+v*26}px;background:${i===Math.round(peak)?"var(--gold)":"color-mix(in srgb,var(--gold) 45%,var(--card2))"};border-radius:2px 2px 0 0"></i>`}).join("");
+  const st=(t,s,body,cls="ai",fl=1)=>`<div class="stage ${cls}" style="flex:${fl};padding:14px"><h3 style="font-size:16.5px">${t}</h3><p style="font-size:13px">${s}</p><div style="flex:1;position:relative;margin-top:8px">${body}</div></div>`;
+  $("#bd").innerHTML=`<div class="row" style="height:300px">
+    ${st("Tile","640 × 640 px",`<div class="pic" style="margin:0"><img src="${IMG}wire_sweep_top.jpg"></div>`,"cam",.9)}
+    ${ARROW}
+    ${st("Backbone","HGNetv2 turns pixels into features at 3 scales",plate(118,0,"")+plate(84,58,"")+plate(56,104,"")+`<div style="position:absolute;bottom:4px;left:0;right:0;font-size:12px;color:var(--mute);text-align:center">1/8 · 1/16 · 1/32 of the tile</div>`,"ai",1.05)}
+    ${ARROW}
+    ${st("Hybrid encoder","mixes fine detail with wide context",`<svg viewBox="0 0 160 170" style="width:100%;height:100%"><g fill="none" stroke="var(--gold)" stroke-width="1.6" opacity=".8">${[30,85,140].map(a=>[30,85,140].map(b=>`<path d="M20 ${a} C80 ${a} 80 ${b} 140 ${b}"/>`).join("")).join("")}</g>${[30,85,140].map(a=>`<circle cx="20" cy="${a}" r="9" fill="var(--card)" stroke="var(--gold)" stroke-width="2.5"/><circle cx="140" cy="${a}" r="9" fill="var(--gold)"/>`).join("")}</svg>`,"ai",1)}
+    ${ARROW}
+    ${st("Decoder","300 queries; each learns to look for one object",`<div style="display:grid;grid-template-columns:repeat(20,7px);gap:3.2px;justify-content:center;padding-top:6px">${dots}</div>`,"ai",1.15)}
+    ${ARROW}
+    ${st("Box refinement","each edge is a probability, sharpened layer by layer",`<div style="display:flex;align-items:flex-end;gap:2px;height:42px;justify-content:center">${dist(8,4.2)}</div><div style="height:2px;background:var(--line);margin:0 8px"></div><div class="cap" style="text-align:center">left edge: offset bins</div><div style="display:flex;align-items:flex-end;gap:2px;height:42px;justify-content:center;margin-top:10px">${dist(8,3.6)}</div><div style="height:2px;background:var(--line);margin:0 8px"></div><div class="cap" style="text-align:center">top edge</div>`,"ai",1.05)}
+    ${ARROW}
+    ${st("Answer","box + 8 type scores",`<div class="pic" style="margin:0"><img src="${IMG}wire_sweep_top.jpg"><div class="box" style="left:55.3%;top:5%;width:11%;height:31.4%"></div></div>
+      <div style="display:grid;gap:3px;margin-top:9px">${[["wire sweep",.72],["broken wire",.08],["sagging loop",.05]].map(([n,v])=>`<div style="display:grid;grid-template-columns:78px 1fr 30px;gap:6px;align-items:center;font-size:11.5px"><span>${n}</span><span style="height:6px;border-radius:3px;background:var(--well)"><span style="display:block;height:100%;width:${v*100}%;border-radius:3px;background:${v>.5?"var(--red)":"var(--slate)"}"></span></span><b>${v.toFixed(2)}</b></div>`).join("")}</div>`,"gen",1)}
+  </div>`;
+};
+
+F.journey=d=>{
+  head("How we got here","Each model and what it taught us. The numbers are the share of real NTUST defects found on held-out test photos.","");
+  $("#fig").querySelector(".ft").style.display="none";
+  const M=[["M2","Generator pictures only","Drawings alone do not transfer to photos.","0%",""],
+           ["M2b","+ real photos","A few hundred real photos made the biggest difference.","42%",""],
+           ["M2c","+ 640 px tiles","Thin wires must stay large in the picture.","56%",""],
+           ["M3j","All data together, GPU","Training sets one at a time made it forget.","69%","flagged every good board"],
+           ["M3k-small","+ good boards, bigger net, per-type levels","It had never seen a good board, so it flagged them all.","63%","0% good boards flagged"]];
+  $("#bd").innerHTML=`<div style="position:relative;height:100%">
+    <div style="position:absolute;left:4%;right:4%;top:58px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--slate),var(--slate) 70%,var(--gold))"></div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:18px;position:relative">
+    ${M.map(([m,c,l,v,x],i)=>{const now=i===4;return `<div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+       <div class="num" style="font-size:${now?44:34}px;font-weight:900;font-stretch:72%;color:${now?"var(--goldInk)":"var(--ink)"};height:48px">${v}</div>
+       <div style="width:${now?26:18}px;height:${now?26:18}px;border-radius:50%;background:${now?"var(--gold)":"var(--card)"};border:4px solid ${now?"var(--goldHi)":"var(--slate)"};margin-top:2px;${now?"box-shadow:0 0 18px var(--gold)":""}"></div>
+       <div class="stage ${now?"ai":""}" style="margin-top:18px;width:100%;min-height:168px;text-align:left">
+         <h3 style="font-size:20px">${m==="M3k-small"?"BondSight":m}</h3>
+         <div style="font-size:13px;color:var(--mute);font-weight:600">${m==="M3k-small"?"M3k-small · ":""}${c}</div>
+         <p style="font-size:14.5px;color:var(--ink);margin-top:12px">${l}</p>
+         ${x?`<div style="margin-top:auto"><span class="chip" style="${now?"border-color:var(--gold);color:var(--goldInk)":""}"><i style="background:${now?"var(--green)":"var(--red)"}"></i>${x}</span></div>`:""}
+       </div></div>`}).join("")}
+  </div></div>`;
+};
+
+/* ======================================================================== photos */
+F.tiling=d=>{
+  head("Big photos are cut into overlapping tiles","Thin wires vanish when a whole board is squeezed into 640 px. Instead the photo is halved and cut into 640 × 640 tiles that overlap by half, so every wire is whole in at least one tile.","Illustration on a generated chip: a 1,920 px photo halves to 960 px, which gives 2 × 2 tiles of 640 px · boxes from all tiles are merged afterwards");
+  const C=["var(--blue)","var(--copper)","var(--gold)","var(--green)"];
+  const T=[[0,0],[1,0],[0,1],[1,1]];
+  $("#bd").innerHTML=`<div style="display:grid;grid-template-columns:420px 1fr;gap:44px;height:100%;align-items:start">
+    <div style="position:relative;width:420px;height:420px;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px #0003">
+      <img src="${IMG}good_top.jpg" style="width:100%;display:block">
+      ${T.map(([i,j],k)=>`<div style="position:absolute;left:${i*140+3*k}px;top:${j*140+3*k}px;width:${280-3*k}px;height:${280-3*k}px;border:3px solid ${C[k]};border-radius:4px"><span style="position:absolute;left:-3px;top:-3px;background:${C[k]};color:#fff;font-size:12px;font-weight:800;padding:2px 7px;border-radius:3px 0 4px 0">tile ${k+1}</span></div>`).join("")}
+    </div>
+    <div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+      ${T.map(([i,j],k)=>`<div><div style="aspect-ratio:1;border-radius:8px;border:3px solid ${C[k]};background:url(${IMG}good_top.jpg) ${i*100}% ${j*100}%/150% 150%"></div><div style="font-size:13.5px;font-weight:700;margin-top:6px">tile ${k+1}</div><div class="cap" style="margin:0">640 × 640 px</div></div>`).join("")}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px">
+        ${[["½","photo shrunk to half size"],["640","pixels per tile side, the model's input"],["320","pixel step: each tile overlaps its neighbour by half"]].map(([a,b])=>`<div style="background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px"><div class="big" style="color:var(--goldInk)">${a}</div><div style="font-size:13.5px;color:var(--mute);margin-top:6px;line-height:1.35">${b}</div></div>`).join("")}
+      </div>
+    </div></div>`;
+};
+
+F.unusual=d=>{
+  head("What the unusual-spot checker sees","Left: a generated unit with two sagging wires. Right: the checker's heat map. Where the picture does not match its memory of good units, it glows.","Memory of 10,000 patches from good units (PatchCore-style) · no defect examples needed");
+  $("#bd").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 150px;gap:22px;height:100%;align-items:start">
+    <div><div style="border-radius:10px;overflow:hidden;height:380px;background:#111 url(/docs/brand/assets/spots-photo.jpg) center/cover;box-shadow:0 8px 24px #0003"></div><div style="font-size:15px;font-weight:700;margin-top:10px">The photo</div></div>
+    <div style="position:relative"><div style="border-radius:10px;overflow:hidden;height:380px;background:#111 url(/docs/brand/assets/spots-heat.jpg) center/cover;box-shadow:0 8px 24px #0003"></div>
+      <div style="position:absolute;left:4%;top:34%;width:26%;height:24%;border:2px dashed #fff;border-radius:50%"></div>
+      <div style="position:absolute;left:60%;top:16%;width:36%;height:22%;border:2px dashed #fff;border-radius:50%"></div>
+      <span class="tag" style="left:3%;top:59%;background:#fff;color:#111">sagging wires</span>
+      <span class="tag" style="left:64%;top:39%;background:#fff;color:#111">sagging wire</span>
+      <div style="font-size:15px;font-weight:700;margin-top:10px">What the checker sees</div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px">
+      <div style="font-size:13px;font-weight:700">unusual</div>
+      <div style="width:22px;height:300px;border-radius:11px;background:linear-gradient(#ff3b2f,#b0201a 35%,#3a0c0a 75%,#111)"></div>
+      <div style="font-size:13px;font-weight:700">usual</div></div>
+  </div>`;
+};
+
+F.screens=d=>{
+  head("The inspector, on a screen next to the line","The station pages as they look in a browser. They work on a tablet, a PC or a phone.","Screens from the station and the online demo");
+  $("#fig").querySelector(".ft").style.display="none";
+  const W=(src,cap)=>`<div><div style="border-radius:10px;overflow:hidden;border:1px solid var(--line);box-shadow:0 10px 26px #0003;background:var(--card2)">
+     <div style="height:26px;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--well);border-bottom:1px solid var(--line)"><i style="width:9px;height:9px;border-radius:50%;background:#ff5f57"></i><i style="width:9px;height:9px;border-radius:50%;background:#febc2e"></i><i style="width:9px;height:9px;border-radius:50%;background:#28c840"></i><span style="margin-left:12px;font-size:11px;color:var(--faint)">bondsight · ${cap.split(":")[0].toLowerCase()}</span></div>
+     <img src="${src}" style="display:block;width:100%"></div>
+     <div style="font-size:15px;font-weight:700;margin-top:10px">${cap.split(":")[0]}<span style="font-weight:400;color:var(--mute)">:${cap.split(":")[1]}</span></div></div>`;
+  $("#bd").innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:26px 30px;align-items:start">
+    ${W("/docs/images/inspect.jpg","Inspect: verdict, both cameras, every finding with its decision buttons")}
+    ${W("/docs/images/inspect-3d.jpg","3D view: tilt the top and angled views to look around the wires")}
+    ${W("/docs/images/review.jpg","Review: every unit with its verdict and decisions, filters on top")}
+    ${W("/docs/images/demo-result.jpg","Demo: drop a photo, get the defects back in seconds")}
+  </div>`;
+};
+
+F.gallery=d=>{
+  head("The eight defect types, as BondSight boxes them","Each box is BondSight's own unedited answer on a picture from our generator, with its confidence.",
+       "Pictures from BondSight's picture generator (demo/samples) · model M3k-small · the good unit gets no box at all");
+  const G=[["wire_sweep_top","wire_sweep","Wire sweep","Pushed sideways out of its lane, often by mould flow. Can touch its neighbour."],
+           ["macro_sagging_loop_angled","sagging_loop","Sagging loop","The loop hangs too low and can touch the chip edge. Seen best from the angled camera."],
+           ["macro_lifted_ball_top","lifted_ball","Lifted ball","The ball bond has come off its pad on the chip: an open circuit waiting to happen."],
+           ["lifted_stitch_angled","lifted_stitch","Lifted stitch","The far end of the wire has lifted off the lead frame."],
+           ["off_center_ball_top","off_center_ball","Off-centre ball","The ball sits off its pad, close enough to short the next one."],
+           ["missing_wire_top","missing_wire","Missing wire","A wire the layout needs is not there."],
+           ["macro_broken_wire_top","broken_wire","Broken wire","The wire is cut or cracked along its length."],
+           ["wire_short_top","wire_short","Wire short","Two wires touch each other."],
+           ["good_top",null,"Good unit","Nothing to report: no box, verdict OK. Most units on a healthy line look like this."]];
+  const VW=416,VH=236;
+  $("#bd").innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">${G.map(([img,cls,name,desc],i)=>{
+    const f=(d.gallery[img]||[]).find(x=>x.cls===cls);
+    let w=640,cx=320,cy=320;
+    if(f){const [x0,y0,x1,y1]=f.box,bw=x1-x0,bh=y1-y0;w=Math.min(640,Math.max(bw*1.9,bh*1.9*VW/VH,250));cx=(x0+x1)/2;cy=(y0+y1)/2}
+    const h=w*VH/VW,k=VW/w;let ox=Math.min(Math.max(cx-w/2,0),640-w),oy=Math.min(Math.max(cy-h/2,0),640-h);
+    const box=f?`<div class="box" style="left:${(f.box[0]-ox)*k}px;top:${(f.box[1]-oy)*k}px;width:${(f.box[2]-f.box[0])*k}px;height:${(f.box[3]-f.box[1])*k}px"></div>
+      <div class="tag" style="left:${Math.max(4,(f.box[0]-ox)*k)}px;top:${Math.min(VH-24,(f.box[3]-oy)*k+5)}px">${name.toLowerCase()} · ${Math.round(f.score*100)}%</div>`:"";
+    return `<div style="background:var(--card2);border:1px solid var(--line);border-radius:14px;overflow:hidden">
+      <div style="position:relative;width:100%;height:${VH}px;overflow:hidden;background:#1a1714 url(${IMG}${img}.jpg) no-repeat;background-size:${640*k}px ${640*k}px;background-position:${-ox*k}px ${-oy*k}px">${box}
+</div>
+      <div style="padding:13px 16px 15px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:18px;font-weight:800">${name}</span>
+        ${f?`<span class="chip" style="padding:3px 9px;font-size:12px"><i style="background:var(--red)"></i>DEFECT</span>`:`<span class="chip" style="padding:3px 9px;font-size:12px"><i style="background:var(--green)"></i>OK</span>`}</div>
+        <div style="font-size:13.5px;color:var(--mute);margin-top:5px;line-height:1.38">${desc}</div></div></div>`}).join("")}</div>`;
+};
+
+F.glance=d=>{
+  $("#fig").classList.add("bare");$("#fig").style.width=Q.get("w")+"px";$("#fig").style.height=Q.get("h")+"px";$(".hd").remove();$(".ft").remove();
+  const C=[["0","%","good boards flagged","complete boards in the test set","var(--green)",ICON.eye],
+           ["100","%","bent wires found","40 MP power-module photos it never saw","var(--gold)",ICON.chip],
+           ["82","%","missing wires found","close-ups of aluminium wedge bonds","var(--copper)",ICON.photo],
+           ["3.5"," s","per unit on a Pi 5","two cameras + the unusual-spot check","var(--blue)",ICON.cam]];
+  $("#bd").style.padding="18px";
+  $("#bd").innerHTML=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;height:100%">${C.map(([n,u,t,s,c,ic])=>`
+    <div style="background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px 24px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0 0 auto 0;height:4px;background:${c}"></div>
+      <div style="position:absolute;right:20px;top:22px;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:${c};background:color-mix(in srgb,${c} 13%,transparent)">${ic}</div>
+      <div class="num" style="font-size:72px;font-weight:900;font-stretch:72%;line-height:1;color:${c}">${n}<span style="font-size:34px">${u}</span></div>
+      <div style="font-size:20px;font-weight:800;margin-top:10px">${t}</div>
+      <div style="font-size:14.5px;color:var(--mute);margin-top:5px">${s}</div></div>`).join("")}</div>`;
+};
+
+fetch("/out/figdata.json").then(r=>r.json()).then(d=>{F[FIG](d);document.fonts.ready.then(()=>{document.body.dataset.ready=1})});
+</script></body></html>
