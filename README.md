@@ -9,6 +9,7 @@ GPU, so the photos never have to leave the factory.
 [![Text: CC BY 4.0](https://img.shields.io/badge/text-CC%20BY%204.0-2A2F33)](#licence-and-credits)
 ![Runs on a PC or a Raspberry Pi 5](https://img.shields.io/badge/runs%20on-PC%20%C2%B7%20Raspberry%20Pi%205-C98A00)
 ![No GPU needed](https://img.shields.io/badge/GPU-not%20needed-767D7A)
+[![Model on Hugging Face](https://img.shields.io/badge/model-Hugging%20Face-F5B400)](https://huggingface.co/Avishek2410/bondsight)
 
 ![BondSight: open-source AOI for wire bonds. Finds wire-bond defects in photos, runs on a PC or a Raspberry Pi 5, learns from your operators.](docs/images/hero.webp)
 
@@ -140,7 +141,8 @@ cd docker && docker compose up -d --build
   <img alt="Deployment: two cameras and BondSight in Docker on a Raspberry Pi 5 or PC with PostgreSQL; a tablet shows the web page; optional GPU training notebooks receive the training export and return a new model" src="docs/images/fig-deploy-light.webp">
 </picture>
 
-The model files are kept out of the code and published with the
+The model files are kept out of the code. They are published on
+[Hugging Face](https://huggingface.co/Avishek2410/bondsight) and with the
 [v0.1.0 release](https://github.com/Avishek2410/bondsight/releases/tag/v0.1.0), along with the
 credits of the photos they learned from ([CREDITS.md](CREDITS.md)). You can also train your own
 with the notebooks in [`training/`](training/). Setup, camera settings and the online-demo mode
@@ -178,15 +180,16 @@ how they're inspected, and how BondSight was built. It starts [here](articles/RE
 - [x] Picture generator, detector training, ONNX export
 - [x] Inspection station: PC + Raspberry Pi 5, Docker, PostgreSQL, operator decisions, training export
 - [x] Online demo mode (nothing saved)
-- [ ] Demo online on Hugging Face Spaces
+- [x] Model on [Hugging Face](https://huggingface.co/Avishek2410/bondsight)
 - [ ] Camera auto-detection and setup wizard; Raspberry Pi camera driver
 - [ ] Reports, CSV export, operator PIN logins, audit log
 - [ ] First production-line pilot
 
 ## Licence and credits
 
-The code is under the [MIT licence](LICENSE). Text and pictures made for this project are under
-CC BY 4.0, so you can share and adapt them as long as you give credit.
+The code is under the [MIT licence](LICENSE). The model files, and the text and pictures made for
+this project, are under CC BY 4.0, so you can share and adapt them, including commercially, as long
+as you give credit.
 
 The trained models learned from photos and networks made by other people: CC BY 4.0 photos from
 National Taiwan University of Science and Technology, WHUrobotics, hawk-team, lyra-wikbf and
